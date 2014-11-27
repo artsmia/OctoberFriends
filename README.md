@@ -1,7 +1,9 @@
 OctoberFriends
 ==============
 
-An OctoberCMS implementation of friends
+Friends is an open source plugin based on OctoberCMS that encourages and recognizes visitor participation 
+as an essential ingredient of the museum experience. 
+Currently, participants must enroll at kiosks in the Museum, but plans are underway to add an online sign-up option.
 
 # Installation
 
@@ -10,6 +12,10 @@ An OctoberCMS implementation of friends
 * In plugins/dma/friends folder run `composer install`. 
 * Install the Rainlab "User" Plugin
 * Enable the "Friends" Plugin
+
+# API Docs
+
+PHP API Documentation is available at [http://developer.dma.org/friends/](http://developer.dma.org/friends/)
 
 ## Wordpress Migrations
 

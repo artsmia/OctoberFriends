@@ -4,7 +4,7 @@ namespace DMA\Friends\Wordpress;
 
 use Illuminate\Support\Facades\DB;
 use DMA\Friends\Models\Usermeta;
-use Rainlab\User\Models\User as OctoberUser;
+use RainLab\User\Models\User as OctoberUser;
 use Rainlab\User\Models\Country;
 use Rainlab\User\Models\State;
 
@@ -37,6 +37,7 @@ class User extends Post
             ->get();
 
         foreach($wordpressUsers as $wuser) {
+            echo '.';
 
             if (empty($wuser->user_email) || count($this->model->where('email', $wuser->user_email)->get())) {
                 continue;
@@ -69,15 +70,21 @@ class User extends Post
      */
     public function updateExistingUsers()
     {
-        foreach(OctoberUser::all() as $user) {
-            $id = $this->db
-                ->table('wp_users')
-                ->select('ID')
-                ->where('user_email', $user->email)
-                ->first();
 
-            $this->updateMetadata($user, $id->ID);
-        }
+        OctoberUser::chunk(500, function($users) {
+        
+            foreach($users as $user) {
+                $id = $this->db
+                    ->table('wp_users')
+                    ->select('ID')
+                    ->where('user_email', $user->email)
+                    ->first();
+
+                if (!$id) continue;
+                
+                $this->updateMetadata($user, $id->ID);
+            }
+        });
     }
 
     /**
@@ -113,6 +120,7 @@ class User extends Post
         $user->street_addr      = $data['street_address'];
         $user->city             = $data['city'];
         $user->zip              = $data['zip'];
+        $user->points           = $data['_badgeos_points'];
 
         // Populate state and country objects
         if (!empty($data['state'])) {
@@ -130,7 +138,6 @@ class User extends Post
         $metadata                           = new Usermeta;
         $metadata->first_name               = $data['first_name'];
         $metadata->last_name                = $data['last_name'];
-        $metadata->points                   = $data['_badgeos_points'];
         $metadata->email_optin              = $data['email_optin'];
         $metadata->current_member           = $data['current_member'];
         $metadata->current_member_number    = $data['current_member_number'];

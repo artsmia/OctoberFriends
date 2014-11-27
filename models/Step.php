@@ -1,6 +1,7 @@
 <?php namespace DMA\Friends\Models;
 
 use Model;
+use Lang;
 
 /**
  * step Model
@@ -30,8 +31,9 @@ class Step extends Model
     /**
      * @var array Relations
      */
-    public $hasMany = [
-        'Activity',
+    public $belongsTo = [
+        'activity'  => ['DMA\Friends\Models\Activity'],
+        'badge'     => ['DMA\Friends\Models\Badge'],
     ];
 
     public $belongsToMany = [
@@ -44,7 +46,16 @@ class Step extends Model
 
     public function scopefindWordpress($query, $id)
     {
-        $query->where('wordpress_id', $id);
+        return $query->where('wordpress_id', $id);
     }
+
+    // public function beforeSave()
+    // {
+    //     \Debugbar::info($this);
+    //     $this->title = Lang::get('dma.friends::lang.app.stepTitle', [
+    //         'count' => $this->count, 
+    //         'title' => $this->activity()->title
+    //     ]);
+    // }
 
 }

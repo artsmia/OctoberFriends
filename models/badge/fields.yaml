@@ -47,6 +47,26 @@ secondaryTabs:
             type: richeditor
             size: huge
         # ===================================
+        #  Categories tab 
+        # ===================================
+        categories:
+            label: Select as many that apply
+            type: relation
+            mode: dropdown 
+            options:
+                nameColumn: name
+            tab: Categories
+        priority:
+            label: Priority
+            type: dropdown
+            options:
+                1: Low
+                5: Medium
+                10: High
+            default: 5
+            tab: Categories
+            span: left
+        # ===================================
         #  Steps tab 
         # ===================================
         steps:
@@ -69,23 +89,6 @@ secondaryTabs:
             span: right
             tab: Configuration
             type: number
-        earned_by:
-            label: Earned by
-            span: left
-            tab: Configuration
-            type: dropdown
-            options:
-                triggers: Completing Steps
-                points: Minimum Number of Points
-                submission: Submission (Reviewed)
-                submission_auto: Submission (Auto-accepted)
-                nomination: Nomination
-                admin: Admin-awarded Only
-                registered: Registered New Account
-                provided_email: Provided Email
-                connected_social: Connected Social Media Account
-                allowed_texting: Allowed SMS
-                completed_profile: Completed user profile
         special:
             label: Special Badge:
             span: right
@@ -149,6 +152,7 @@ secondaryTabs:
             label: Published
             tab: Publishing Options
             type: checkbox
+            default: true
         is_archived:
             label: Archive
             tab: Publishing Options

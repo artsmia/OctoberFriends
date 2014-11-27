@@ -1,7 +1,7 @@
 <?php
 
 use League\FactoryMuffin\Facade as FactoryMuffin;
-use RainLab\User\Models\User;
+use DMA\Friends\Classes\UserExtend;
 use DMA\Friends\Tests\MuffinCase;
 
 class UserModelTest extends MuffinCase
@@ -54,6 +54,43 @@ class UserModelTest extends MuffinCase
         $user->steps()->save($step);
 
         $this->assertEquals($user->steps[0]->id, $step->id);
+    }
+
+    public function testCanHaveAndRemovePoints()
+    {
+        $incrementVal       = 10;
+        $user               = FactoryMuffin::create('RainLab\User\Models\User');
+        $points             = $user->points;
+        $points_this_week   = $user->points_this_week;
+
+        $userExtend = new UserExtend($user);
+
+        // Add points
+        $userExtend->addPoints($incrementVal);
+
+        $points += $incrementVal;
+        $points_this_week += $incrementVal;
+
+        $this->assertEquals($user->points, $points);
+        $this->assertEquals($user->points_this_week, $points_this_week);
+
+        // Remove Points
+        $userExtend->removePoints($incrementVal);
+
+        $points -= $incrementVal;
+        $points_this_week -= $incrementVal;
+
+        $this->assertEquals($user->points, $points);
+        $this->assertEquals($user->points_this_week, $points_this_week);
+
+    }
+
+    public function testCanUserExtendLoadNullUser()
+    {
+        $userExtend = new UserExtend;
+
+        $user = $userExtend->user->firstOrFail();
+        $this->assertInstanceOf('RainLab\User\Models\User', $user);
     }
 
 }

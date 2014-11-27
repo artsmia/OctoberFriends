@@ -3,6 +3,10 @@
 namespace DMA\Friends\Classes;
 
 use DMA\Friends\Models\ActivityLog;
+use InvalidArgumentException;
+use Lang;
+use DateTime;
+use DateTimeZone;
 
 class FriendsLog
 {
@@ -14,42 +18,31 @@ class FriendsLog
      * 
      * @param $params
      * An array of parameters about the log entry
-     * - 'user_id': The user ID to associate the log entry
+     * - 'user': The user object to associate the log entry
      * - 'message': A log message
      * - (optional) 'object': A database model to associate the log with
      * - (optional) 'points_earned': The number of points earned by the action
      * - (optional) 'artwork_id': The assession number of an artwork to associate the log entry
      */
-    public function write($action, $params)
+    public static function write($action, array $params)
     {
-        $log            = new ActivityLog;
-        $log->user_id   = $params['user_id'];
-        $log->site_id   = ''; //TODO implement settings and/or gethostname();
-        $log->action    = $action;
-        $log->message   = $params['message'];
-        $log->points_earned = $params['points_earned'];
-        
-        // Log date/time
-        $datetime = new DateTime;
-        $tzstring = date_default_timezone_get();
-        $timezone = new DateTimeZone($tzstring);
-        $datetime->setTimezone($timezone);
+        $log                = new ActivityLog;
+        $log->user          = $params['user'];
+        $log->action        = $action;
+        $log->message       = $params['message'];
+        $log->points_earned = isset($params['points_earned']) ? $params['points_earned'] : 0;
+        $log->timestamp     = new DateTime('now');
 
-        $log->timestamp = $datetime->format('c');
-        $log->timezone  = $datetime->getTimezone()->getName(); 
-
-        // Object type and id
-        // pass an object in $params['object'] and do some logic for that
-        if (isset($params['object']) && !empty($params['object'])) {
-            $log->object_type   = typeof($params['object']);
-            $log->object_id     = $params['object']->id;
-        }
-
-        if (isset($params['artwork_id']) {
+        if (isset($params['artwork_id'])) {
             $log->artwork_id = $params['artwork_id'];
         }
 
         $log->save();
+
+        // Associate an object if present
+        if (isset($params['object']) && !empty($params['object'])) {
+            $params['object']->activityLogs()->save($log);
+        }
 
     }
 
@@ -61,13 +54,24 @@ class FriendsLog
      * Log an activity
      *
      * @array $params
+     * - (required) user
+     * - (required) object
      * An array of parameters to log
      * See write() for details
      *
      * @return void
      */
-    public function activity($params)
+    public static function activity($params)
     {
+        if (empty($params['user']) || empty($params['object']))
+            throw new InvalidArgumentException('Invalid Parameters');
+
+        $params['message'] = Lang::get('dma.friends::lang.log.activity', [
+            'name'          => $params['user']->name, 
+            'title'         => $params['object']->title,
+            'points_earned' => $params['object']->points,
+        ]);
+
         self::write('activity', $params);
     }
 
@@ -80,8 +84,16 @@ class FriendsLog
      *
      * @return void
      */
-    public function artwork($params)
+    public static function artwork($params)
     {
+        if (empty($params['user']) || empty($params['artwork_id']))
+            throw new InvalidArgumentException('Invalid Parameters');
+
+        $params['message'] = Lang::get('dma.friends::lang.log.artwork', [
+            'name'          => $params['user']->name, 
+            'artwork_id'    => $params['artwork_id'],
+        ]); 
+
         self::write('artwork', $params);
     }
 
@@ -92,10 +104,18 @@ class FriendsLog
      * @array $params
      * An array of parameters to log
      *
-     * @return void
+    * @return void
      */
-    public function checkin($params)
+    public static function checkin($params)
     {
+        if (empty($params['user']) || empty($params['object']))
+            throw new InvalidArgumentException('Invalid Parameters');
+
+        $params['message'] = Lang::get('dma.friends::lang.log.checkin', [
+            'name'  => $params['user']->name, 
+            'title' => $params['object']->title
+        ]); 
+
         self::write('checkin', $params);
     }
 
@@ -108,8 +128,17 @@ class FriendsLog
      *
      * @return void
      */
-    public function points($params)
+    public static function points($params)
     {
+        if (empty($params['user']) || empty($params['points_earned']))
+            throw new InvalidArgumentException('Invalid Parameters');
+
+        $params['message'] = Lang::get('dma.friends::lang.log.points', [
+            'name'          => $params['user']->name, 
+            'points'        => $params['points_earned'],
+            'total_points'  => $params['user']->points,
+        ]); 
+
         self::write('points', $params);
     }
 
@@ -122,8 +151,16 @@ class FriendsLog
      *
      * @return void
      */
-    public function reward($params)
+    public static function reward($params)
     {
+        if (empty($params['user']) || empty($params['object']))
+            throw new InvalidArgumentException('Invalid Parameters');
+
+        $params['message'] = Lang::get('dma.friends::lang.log.reward', [
+            'name'  => $params['user']->name, 
+            'title' => $params['object']->title
+        ]); 
+
         self::write('reward', $params);
     }
 
@@ -136,8 +173,16 @@ class FriendsLog
      *
      * @return void
      */
-    public function unlocked($params)
+    public static function unlocked($params)
     {
+        if (empty($params['user']) || empty($params['object']))
+            throw new InvalidArgumentException('Invalid Parameters');
+
+        $params['message'] = Lang::get('dma.friends::lang.log.unlocked', [
+            'name'  => $params['user']->name, 
+            'title' => $params['object']->title
+        ]);  
+
         self::write('unlocked', $params);
     }
 

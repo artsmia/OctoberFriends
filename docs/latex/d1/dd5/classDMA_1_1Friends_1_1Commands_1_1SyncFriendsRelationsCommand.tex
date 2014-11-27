@@ -1,0 +1,224 @@
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand}{\section{D\+M\+A\textbackslash{}Friends\textbackslash{}Commands\textbackslash{}Sync\+Friends\+Relations\+Command Class Reference}
+\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand}\index{D\+M\+A\textbackslash{}\+Friends\textbackslash{}\+Commands\textbackslash{}\+Sync\+Friends\+Relations\+Command@{D\+M\+A\textbackslash{}\+Friends\textbackslash{}\+Commands\textbackslash{}\+Sync\+Friends\+Relations\+Command}}
+}
+Inheritance diagram for D\+M\+A\textbackslash{}Friends\textbackslash{}Commands\textbackslash{}Sync\+Friends\+Relations\+Command\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{d1/dd5/classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a199c1e86fcdeb44b66c5b3150cb737ad}{\+\_\+\+\_\+construct} ()
+\item 
+\hyperlink{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_acfb07355576a2f8583242ce4e145d7be}{fire} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a0f2f9249d994c50002e593c9250d8940}{{\bfseries \$name} = 'friends\+:sync-\/relations'}\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a0f2f9249d994c50002e593c9250d8940}
+
+\item 
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_aa15d7cb86809962d2c857c75d803114a}{{\bfseries \$description} = 'Syncronize wordpress data relations'}\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_aa15d7cb86809962d2c857c75d803114a}
+
+\item 
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a0f80681225760f8800c68595db90e238}{{\bfseries \$db} = null}\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a0f80681225760f8800c68595db90e238}
+
+\item 
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_afede3d36037ec94d313e2382b9103896}{{\bfseries \$user\+Step\+Table} = 'dma\+\_\+friends\+\_\+step\+\_\+user'}\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_afede3d36037ec94d313e2382b9103896}
+
+\item 
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a4cabd040654272373d0d6828d4967529}{{\bfseries \$user\+Badge\+Table} = 'dma\+\_\+friends\+\_\+badge\+\_\+user'}\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a4cabd040654272373d0d6828d4967529}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a199c1e86fcdeb44b66c5b3150cb737ad}{\index{D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command@{D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command}!\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}}
+\index{\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}!D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command@{D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command}}
+\subsubsection[{\+\_\+\+\_\+construct}]{\setlength{\rightskip}{0pt plus 5cm}D\+M\+A\textbackslash{}\+Friends\textbackslash{}\+Commands\textbackslash{}\+Sync\+Friends\+Relations\+Command\+::\+\_\+\+\_\+construct (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_a199c1e86fcdeb44b66c5b3150cb737ad}
+Create a new command instance. \begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+
+\begin{DoxyCode}
+49     \{   
+50         $this->db = DB::connection(\textcolor{stringliteral}{'friends\_wordpress'});
+51 
+52         parent::\_\_construct();
+53     \}   
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_acfb07355576a2f8583242ce4e145d7be}{\index{D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command@{D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command}!fire@{fire}}
+\index{fire@{fire}!D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command@{D\+M\+A\+::\+Friends\+::\+Commands\+::\+Sync\+Friends\+Relations\+Command}}
+\subsubsection[{fire}]{\setlength{\rightskip}{0pt plus 5cm}D\+M\+A\textbackslash{}\+Friends\textbackslash{}\+Commands\textbackslash{}\+Sync\+Friends\+Relations\+Command\+::fire (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classDMA_1_1Friends_1_1Commands_1_1SyncFriendsRelationsCommand_acfb07355576a2f8583242ce4e145d7be}
+Execute the console command. \begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+
+\begin{DoxyCode}
+60     \{  
+61 
+62         \textcolor{comment}{// p2p connections}
+63         $p2ps = $this->db->table(\textcolor{stringliteral}{'wp\_p2p'})
+64             ->get();
+65 
+66         \textcolor{keywordflow}{foreach}($p2ps as $p2p) \{
+67             list($from, $t, $to) = explode(\textcolor{charliteral}{'-'}, $p2p->p2p\_type);
+68 
+69             \textcolor{keywordflow}{switch}($from) \{
+70                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'activity'}:
+71                     $from = Activity::findWordpress($p2p->p2p\_from)->first();
+72                     $from\_table = \textcolor{stringliteral}{'activity'};
+73                     \textcolor{keywordflow}{break};
+74                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'badge'}:
+75                     $from = Badge::findWordpress($p2p->p2p\_from)->first();
+76                     $from\_table = \textcolor{stringliteral}{'badge'};
+77                     \textcolor{keywordflow}{break};
+78                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'dma-location'}:
+79                     $from = Location::findWordpress($p2p->p2p\_from)->first();
+80                     $from\_table = \textcolor{stringliteral}{'location'};
+81                     \textcolor{keywordflow}{break};
+82                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'step'}:
+83                     $from = Step::findWordpress($p2p->p2p\_from)->first();
+84                     $from\_table = \textcolor{stringliteral}{'step'};
+85                     \textcolor{keywordflow}{break};
+86                 \textcolor{keywordflow}{default}:
+87                     $from = \textcolor{keyword}{false};
+88             \}
+89 
+90             \textcolor{keywordflow}{switch}($to) \{
+91                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'activity'}:
+92                     $to = Activity::findWordpress($p2p->p2p\_to)->first();
+93                     $to\_table = \textcolor{stringliteral}{'activity'};
+94                     \textcolor{keywordflow}{break};
+95                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'badge'}:
+96                     $to = Badge::findWordpress($p2p->p2p\_to)->first();
+97                     $to\_table = \textcolor{stringliteral}{'badge'};
+98                     \textcolor{keywordflow}{break};
+99                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'dma-location'}:
+100                     $to = Location::findWordpress($p2p->p2p\_to)->first();
+101                     $to\_table = \textcolor{stringliteral}{'location'};
+102                     \textcolor{keywordflow}{break};
+103                 \textcolor{keywordflow}{case} \textcolor{stringliteral}{'step'}:
+104                     $to = Step::findWordpress($p2p->p2p\_to)->first();
+105                     $to\_table = \textcolor{stringliteral}{'step'}; 
+106                     \textcolor{keywordflow}{break};
+107                 \textcolor{keywordflow}{default}:
+108                     $to = \textcolor{keyword}{false};
+109             \}
+110 
+111             \textcolor{keywordflow}{if} ($from && $to) \{
+112                 $table = \textcolor{stringliteral}{'dma\_friends\_'} . $from\_table . \textcolor{charliteral}{'\_'} . $to\_table;
+113 
+114                 \textcolor{keywordflow}{switch}($table) \{
+115                     \textcolor{keywordflow}{case} \textcolor{stringliteral}{'dma\_friends\_step\_badge'}:
+116                         $to->steps()->save($from);
+117                         $this->info(\textcolor{stringliteral}{'from: '} . $from->title . \textcolor{stringliteral}{' --|-|-- '} . $to->title);
+118 
+119                     \textcolor{keywordflow}{default}:
+120 
+121                         $values = [
+122                             $from\_table . \textcolor{stringliteral}{'\_id'}   => $from->id,
+123                             $to\_table . \textcolor{stringliteral}{'\_id'}     => $to->id
+124                         ];
+125 
+126                         \textcolor{keywordflow}{if} (Schema::hasTable($table)) \{
+127                             DB::table($table)->insert($values);
+128                             $this->info(\textcolor{stringliteral}{'from: '} . $from->title . \textcolor{stringliteral}{' ----- '} . $to->title);
+129                         \} \textcolor{keywordflow}{else} \{
+130                             $this->error(\textcolor{stringliteral}{'table doesnt exist'});
+131                         \} 
+132 
+133                 \}
+134             \}
+135         \}
+136 
+137         \textcolor{comment}{// User achievements}
+138         $achievements = $this->db->table(\textcolor{stringliteral}{'wp\_usermeta'})
+139             ->where(\textcolor{stringliteral}{'meta\_key'}, \textcolor{stringliteral}{'\_badgeos\_achievements'})
+140             ->get();
+141 
+142         $post = \textcolor{keyword}{new} Post;
+143 
+144         $this->info(\textcolor{stringliteral}{'Sync Achievements'});        
+145 
+146         \textcolor{keywordflow}{foreach} ($achievements as $achievement) \{
+147             $user = User::find($achievement->user\_id);
+148 
+149             \textcolor{keywordflow}{if} (!$user) \textcolor{keywordflow}{continue};
+150 
+151             $this->info(\textcolor{stringliteral}{'Importing achievements for '} . $user->email);
+152             
+153             \textcolor{comment}{// Flush existing records}
+154             DB::table($this->userStepTable)
+155                 ->where(\textcolor{stringliteral}{'user\_id'}, $user->id)
+156                 ->delete();
+157 
+158             DB::table($this->userBadgeTable)
+159                 ->where(\textcolor{stringliteral}{'user\_id'}, $user->id)
+160                 ->delete();
+161 
+162             $data = unserialize($achievement->meta\_value);
+163 
+164             \textcolor{keywordflow}{foreach}($data as $d) \{
+165                 \textcolor{comment}{// wtf we don't need arrays in our arrays if we want to array}
+166                 $d = array\_pop($d);
+167 
+168                 $link = [
+169                     \textcolor{stringliteral}{'user\_id'}       => $user->id,
+170                     \textcolor{stringliteral}{'created\_at'}    => $post->epochToTimestamp($d->date\_earned),
+171                 ];
+172 
+173                 \textcolor{comment}{// About half way thru the data the location key changes.}
+174                 \textcolor{comment}{// so lets deal with that}
+175                 \textcolor{keywordflow}{if} (isset($d->location)) \{
+176                     $location\_id = $d->location;
+177                 \} elseif (isset($d->location\_earned)) \{
+178                     $location\_id = $d->location\_earned;
+179                 \} \textcolor{keywordflow}{else} \{
+180                     $location\_id = null;
+181                 \}
+182 
+183                 $location = Location::findWordpress($location\_id)->first();
+184                 \textcolor{keywordflow}{if} (isset($location->id)) \{
+185                     $link[\textcolor{stringliteral}{'location\_id'}] = $location->id;
+186                 \}
+187 
+188                 \textcolor{keywordflow}{if} ($d->post\_type == \textcolor{stringliteral}{'step'}) \{
+189 
+190                     $step = Step::findWordpress($d->ID)->first();
+191                     $link[\textcolor{stringliteral}{'step\_id'}] = $step->id;
+192                     DB::table($this->userStepTable)->insert($link);
+193 
+194                 \} elseif ($d->post\_type == \textcolor{stringliteral}{'badge'}) \{
+195 
+196                     $badge = Badge::findWordpress($d->ID)->first();
+197                     $link[\textcolor{stringliteral}{'badge\_id'}] = $badge->id;
+198                     DB::table($this->userBadgeTable)->insert($link);
+199 
+200                 \}
+201         
+202             \}
+203         \}
+204 
+205         $this->info(\textcolor{stringliteral}{'Sync complete'});
+206 
+207     \}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+commands/Sync\+Friends\+Relations\+Command.\+php\end{DoxyCompactItemize}
