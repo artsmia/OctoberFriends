@@ -14,7 +14,14 @@ class RatingResource extends BaseResource {
     protected $model        = '\DMA\Friends\Models\Rating';
     protected $transformer  = '\DMA\Friends\API\Transformers\RatingTransformer';
     
-   
+    /**
+     * The listed actions that don't required check if
+     * user can perform the action
+     * @var array
+     */
+    protected $skipUserPermissionValidation = [
+            'index', 'show'
+    ];
     
     
     public function __construct()
@@ -56,7 +63,7 @@ class RatingResource extends BaseResource {
      *     path="ratings/{object}/{objectId}",
      *     description="Get all object ratings",
      *     summary="Get all ratings by object type",
-     *     tags={ "ratings"},
+     *     tags={ "ratings" },
      *     
      *     @SWG\Parameter(
      *         description="Object",
@@ -67,6 +74,9 @@ class RatingResource extends BaseResource {
      *         enum={"activity", "badge"}
      *     ),
      *      
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -196,6 +206,9 @@ class RatingResource extends BaseResource {
      *     summary="Rate an object",
      *     tags={ "ratings"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="Object to rate",
      *         in="path",
@@ -328,7 +341,10 @@ class RatingResource extends BaseResource {
      *     description="Rate an object",
      *     summary="Rate an object",    
      *     tags={ "ratings"},
-     *
+     *     
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="Object to rate",
      *         in="path",
@@ -383,8 +399,8 @@ class RatingResource extends BaseResource {
     {
         # TODO : stop default behaviour of the base resource and 
         # return and error
-        return Response::api()->errorForbidden();
-        #return parent::index();
+        //return Response::api()->errorForbidden();
+        return parent::index();
     }
     
     /**
@@ -394,6 +410,9 @@ class RatingResource extends BaseResource {
      *     summary="Find a rate by id",
      *     tags={ "ratings"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of rating to fetch",
      *         format="int64",

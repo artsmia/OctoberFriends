@@ -8,9 +8,17 @@ class StepResource extends BaseResource {
 
     //protected $pageSize     = 0;
     protected $model        = '\DMA\Friends\Models\Step';
-
     protected $transformer  = '\DMA\Friends\API\Transformers\StepTransformer';
 
+    /**
+     * The listed actions that don't required check if
+     * user can perform the action
+     * @var array
+     */
+    protected $skipUserPermissionValidation = [
+            'index', 'show'
+    ];
+    
     /**
      * @SWG\Get(
      *     path="steps",
@@ -18,6 +26,9 @@ class StepResource extends BaseResource {
      *     summary="Return all steps",
      *     tags={ "steps"},
      *         
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -57,6 +68,9 @@ class StepResource extends BaseResource {
      *     summary="Find a step by id",
      *     tags={ "steps"},
      *      
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of step to fetch",
      *         format="int64",

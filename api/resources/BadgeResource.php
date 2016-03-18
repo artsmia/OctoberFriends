@@ -1,13 +1,25 @@
 <?php namespace DMA\Friends\API\Resources;
 
 use DMA\Friends\Classes\API\BaseResource;
+use DMA\Friends\API\Resources\UserTransformerInjectionTrait;
 
 class BadgeResource extends BaseResource {
 
+    use UserTransformerInjectionTrait;
+    
     protected $model        = '\DMA\Friends\Models\Badge';
-
     protected $transformer  = '\DMA\Friends\API\Transformers\BadgeTransformer';
 
+    /**
+     * The listed actions that don't required check if 
+     * user can perform the action
+     * @var array
+     */
+    protected $skipUserPermissionValidation = [
+            'index', 'show'
+    ];
+    
+     
     /**
      * @SWG\Get(
      *     path="badges",
@@ -15,6 +27,9 @@ class BadgeResource extends BaseResource {
      *     summary="Return all badges",
      *     tags={ "badges"},
      *     
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -24,7 +39,16 @@ class BadgeResource extends BaseResource {
      *     @SWG\Parameter(
      *         ref="#/parameters/sort"
      *     ),
-     *          
+     *     
+     *     @SWG\Parameter(
+     *         description="Include a completed steps for a given user on each badge",
+     *         format="int64",
+     *         name="user",
+     *         in="query",
+     *         type="integer",
+     *         required=false
+     *     ), 
+     *            
      *     @SWG\Response(
      *         response=200,
      *         description="Successful response",
@@ -55,6 +79,9 @@ class BadgeResource extends BaseResource {
      *     tags={ "badges"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         description="ID of badge to fetch",
      *         format="int64",
      *         in="path",
@@ -63,6 +90,15 @@ class BadgeResource extends BaseResource {
      *         type="integer"
      *     ),
      *
+     *     @SWG\Parameter(
+     *         description="Include a completed steps for a given user on each badge",
+     *         format="int64",
+     *         name="user",
+     *         in="query",
+     *         type="integer",
+     *         required=false
+     *     ), 
+     *           
      *     @SWG\Response(
      *         response=200,
      *         description="Successful response",

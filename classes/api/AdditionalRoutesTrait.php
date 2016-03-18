@@ -32,7 +32,9 @@ trait AdditionalRoutesTrait
     public function addAdditionalRoute($handler, $url=Null, array $verbs=['GET'], $name=Null)
     {
         if( method_exists( $this, $handler ) ) {
-            $url = ($url) ? $url : $handler;
+            // 2015-12-07 : Fixed wrong assignation of URL suffix
+            // whe $url is empty
+            $url = ($url) ? $url : '';//$handler;
             $this->additionalRoutes[$url] = [
                 'handler' => $handler,
                 'verbs' => $verbs,
@@ -50,24 +52,6 @@ trait AdditionalRoutesTrait
         return $this->additionalRoutes;
     }
     
-    
-    /**
-     * (non-PHPdoc)
-     * @see \Illuminate\Routing\Controller::callAction()
-     */
-    public function callAction($method, $parameters)
-    {
-        try{
-            return parent::callAction($method, $parameters);
-        } catch(Exception $e) {
-            // Send exception to log 
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
-            
-            $message = $e->getMessage();
-            return Response::api()->errorInternalError($message);
-        }
-    }
     
     /**
      * Catch all missing HTTP verbs

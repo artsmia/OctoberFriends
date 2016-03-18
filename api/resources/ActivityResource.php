@@ -8,15 +8,25 @@ use DMA\Friends\Classes\API\BaseResource;
 use DMA\Friends\Activities\ActivityCode;
 use DMA\Friends\Activities\LikeWorkOfArt;
 use DMA\Friends\API\Transformers\UserProfileTransformer;
+use DMA\Friends\API\Resources\UserTransformerInjectionTrait;
 
 
 class ActivityResource extends BaseResource {
-
+    
+    use UserTransformerInjectionTrait;
+    
     protected $model        = '\DMA\Friends\Models\Activity';
-
     protected $transformer  = '\DMA\Friends\API\Transformers\ActivityTransformer';
 
-
+    /**
+     * The listed actions that don't required check if 
+     * user can perform the action
+     * @var array
+     */
+    protected $skipUserPermissionValidation = [
+            'index', 'show' 
+    ];
+    
     public function __construct()
     {
         // Add additional routes to Activity resource
@@ -69,6 +79,9 @@ class ActivityResource extends BaseResource {
      *     tags={ "activity"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         description="ID of the user checking the activity",
      *         format="int64",
      *         in="path",
@@ -113,7 +126,10 @@ class ActivityResource extends BaseResource {
      *     description="Checkin user activities",
      *     summary="Checkin an activity",
      *     tags={ "activity"},
-     *
+     *     
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of the user checking the activity",
      *         format="int64",
@@ -234,6 +250,9 @@ class ActivityResource extends BaseResource {
      *     tags={ "activity"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         description="ID of the user checking the activity",
      *         format="int64",
      *         in="path",
@@ -274,6 +293,9 @@ class ActivityResource extends BaseResource {
      *     summary="Bulk activity checkin",
      *     tags={ "activity"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of the user checking the activity",
      *         format="int64",
@@ -365,7 +387,7 @@ class ActivityResource extends BaseResource {
      * @SWG\Definition(
      *     definition="response.ok.activity.code",
      *     type="object",
-     *     required={"success", "activity_code", "message", "feedback_message", "complete_message", "data"},
+     *     required={"success", "activity_code", "activity_points", "message", "feedback_message", "complete_message", "data"},
      *     @SWG\Property(
      *         property="success",
      *         type="boolean",
@@ -382,7 +404,12 @@ class ActivityResource extends BaseResource {
      *     @SWG\Property(
      *         property="activity_code",
      *         type="string"
-     *     ),  
+     *     ),
+     *     @SWG\Property(
+     *         property="activity_points",
+     *         type="integer",
+     *         format="int32"
+     *     ),      
      *     @SWG\Property(
      *         property="message",
      *         type="string"
@@ -408,7 +435,7 @@ class ActivityResource extends BaseResource {
      * @SWG\Definition(
      *     definition="response.failed.activity.code",
      *     type="object",
-     *     required={"success", "activity_code", "message", "feedback_message", "complete_message"},
+     *     required={"success", "activity_code", "activity_points", "message", "feedback_message", "complete_message"},
      *     @SWG\Property(
      *         property="success",
      *         type="boolean"
@@ -425,6 +452,11 @@ class ActivityResource extends BaseResource {
      *         property="activity_code",
      *         type="string"
      *     ),
+     *     @SWG\Property(
+     *         property="activity_points",
+     *         type="integer",
+     *         format="int32"
+     *     ),      
      *     @SWG\Property(
      *         property="message",
      *         type="string"
@@ -463,7 +495,12 @@ class ActivityResource extends BaseResource {
      *     @SWG\Property(
      *         property="activity_code",
      *         type="string"
-     *     ),  
+     *     ), 
+     *     @SWG\Property(
+     *         property="activity_points",
+     *         type="integer",
+     *         format="int32"
+     *     ), 
      *     @SWG\Property(
      *         property="message",
      *         type="string"
@@ -490,7 +527,7 @@ class ActivityResource extends BaseResource {
      * @SWG\Definition(
      *     definition="response.ok.activity.code.user",
      *     type="object",
-     *     required={"success", "activity_code", "message", "feedback_message", "complete_message", "user", "data"},
+     *     required={"success", "activity_code", "activity_points", "message", "feedback_message", "complete_message", "user", "data"},
      *     @SWG\Property(
      *         property="success",
      *         type="boolean"
@@ -505,6 +542,11 @@ class ActivityResource extends BaseResource {
      *     @SWG\Property(
      *         property="activity_code",
      *         type="string"
+     *     ),
+     *     @SWG\Property(
+     *         property="activity_points",
+     *         type="integer",
+     *         format="int32"
      *     ),
      *     @SWG\Property(
      *         property="message",
@@ -567,7 +609,7 @@ class ActivityResource extends BaseResource {
         // process Activity code first
         if (!$activity = ActivityCode::process($user, $params)) {
             // Not found activity with that code.
-            // Trying if is a object assession number
+            // Trying if is an object  number
             $activity = LikeWorkOfArt::process($user, $params);
         }
         
@@ -583,6 +625,7 @@ class ActivityResource extends BaseResource {
         $payload = [
             'success'           => ($activity) ? true : false,
             'activity_code'     => $code,
+            'activity_points'   => ( $activity ) ? $activity->points : null,
             'message'           => $message,
             'feedback_message'  => ( $activity ) ? $activity->feedback_message : null,
             'complete_message'  => ( $activity ) ? $activity->complete_message : null
@@ -632,6 +675,9 @@ class ActivityResource extends BaseResource {
      *     tags={ "activity"},
      *     
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -641,6 +687,15 @@ class ActivityResource extends BaseResource {
      *         ref="#/parameters/sort"
      *     ),
      *     
+     *     @SWG\Parameter(
+     *         description="Include a completed steps for a given user on each activity",
+     *         format="int64",
+     *         name="user",
+     *         in="query",
+     *         type="integer",
+     *         required=false
+     *     ), 
+     *          
      *     @SWG\Response(
      *         response=200,
      *         description="Successful response",
@@ -671,6 +726,9 @@ class ActivityResource extends BaseResource {
      *     tags={ "activity"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         description="ID of activity to fetch",
      *         format="int64",
      *         in="path",
@@ -679,6 +737,15 @@ class ActivityResource extends BaseResource {
      *         type="integer"
      *     ),
      *
+     *     @SWG\Parameter(
+     *         description="Include a completed steps for a given user on each activity",
+     *         format="int64",
+     *         name="user",
+     *         in="query",
+     *         type="integer",
+     *         required=false
+     *     ), 
+     * 
      *     @SWG\Response(
      *         response=200,
      *         description="Successful response",

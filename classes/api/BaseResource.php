@@ -4,8 +4,9 @@
 use Log;
 use Model;
 use Input;
-use Response;
 use Request;
+use Response;
+use Exception;
 
 //use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -19,14 +20,17 @@ use League\Fractal\TransformerAbstract;
 use DMA\Friends\Classes\API\ModelRepository;
 use DMA\Friends\Classes\API\FilterSpec;
 use DMA\Friends\Classes\API\AdditionalRoutesTrait;
+use DMA\Friends\Classes\API\Auth\UserAccessLevelTrait;
 
 use October\Rain\Database\Builder;
+
 
 
 class BaseResource extends Controller {
 
     use AdditionalRoutesTrait;
-
+    use UserAccessLevelTrait;
+    
     /**
      * @var string Eloquent model name
      */
@@ -55,6 +59,18 @@ class BaseResource extends Controller {
     public $allowActions = ['index', 'show', 'store', 'update', 'destroy'];
 
 
+    /**
+     * List of actions that don't requiered API Authentication
+     * @var array
+     */
+    public $publicActions = [];
+    
+    
+    /**
+     * Exclude filters 
+     */
+    public $excludeFilters = [];
+    
     /**
      * Create and return an instance of a ModelRepository or the configure model
 
@@ -103,6 +119,20 @@ class BaseResource extends Controller {
         return $sortBy;
     }
     
+    
+    /**
+     * Return list of URL parameters that should be 
+     * exclude of the list of filters to apply to the 
+     * queryset.
+     * 
+     * @return array
+     */
+    protected function getExcludedFiltersList()
+    {
+        return $this->excludeFilters;
+    }
+    
+    
     /**
      * Get filters to apply to this resource
      * @return array of \DMA\Friends\Classes\API\FilterSpec
@@ -110,18 +140,18 @@ class BaseResource extends Controller {
     protected function getFilters()
     {
         $filters=[];
-        $ignoreParameter = ['per_page','page', 'sort'];
+        $ignoreParameters = array_unique(array_merge(['per_page','page', 'sort'], $this->getExcludedFiltersList()));
         
         // Adding the URL path to the $ignoreParameter helps to
         // manage an issue that only happens when using Nginx to server
         // OctooberCMS. The problem is that depending on how is configured
         // Nginx causes that sometimes to include the URL path of 
         // the response of Input:all()
-        $ignoreParameter[] = Request::path();
-        $ignoreParameter[] = '/' . Request::path();
+        $ignoreParameters[] = Request::path();
+        $ignoreParameters[] = '/' . Request::path();
 
         foreach(Input::all() as $key => $value) {
-            if (!in_array($key, $ignoreParameter)) {
+            if (!in_array($key, $ignoreParameters)) {
                 // Separate operator and filter name
                 $bits = explode('__', $key);
                 
@@ -137,7 +167,6 @@ class BaseResource extends Controller {
                 $filters[] = $filterSpec;
             }
         }
-        
         return $filters;
     }
     
@@ -340,5 +369,36 @@ class BaseResource extends Controller {
                 ]
         ]);
     }
+    
+    /**
+     * (non-PHPdoc)
+     * @see \Illuminate\Routing\Controller::callAction()
+     */
+    public function callAction($method, $parameters)
+    {
+        try{
+            // If the user don't had access to this resource
+            // validateUserAccess will throw an exection
+            $this->validatedUserAccess($method, $parameters);
+
+            
+            // call menthod an return response the user has 
+            // permission access
+            return parent::callAction($method, $parameters);
+            
+         }catch(Exception $e){
+            //Send exception to log
+            Log::error($e->getMessage());
+            Log::error($e->getTraceAsString());
+    
+            $message = $e->getMessage();
+            $responseMethod  = array_get([
+                403 => 'errorForbidden'        
+            ], $e->getCode(), 'errorInternalError');
+            
+            return Response::api()->{$responseMethod}($message);
+        }
+    }
+    
     
 }

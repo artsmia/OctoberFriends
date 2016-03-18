@@ -13,11 +13,11 @@ use DMA\Friends\Models\ActivityMetadata;
 
 class ActivityMetadataResource extends BaseResource {
 
-    protected $model        = '\DMA\Friends\Models\ActivityMetadata';
 
+    protected $model        = '\DMA\Friends\Models\ActivityMetadata';
     protected $transformer  = '\DMA\Friends\API\Transformers\ActivityMetadataTransformer';
 
-
+    
     public function __construct()
     {
         // Add additional routes to Activity resource
@@ -34,6 +34,9 @@ class ActivityMetadataResource extends BaseResource {
      *     summary="Returns all activity medatadata by user id",
      *     tags={ "activity-metadata"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -103,6 +106,9 @@ class ActivityMetadataResource extends BaseResource {
      *     tags={ "activity-metadata"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -140,6 +146,9 @@ class ActivityMetadataResource extends BaseResource {
      *     summary="Return activity metadata by activity type and user id",
      *     tags={ "activity-metadata"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -242,6 +251,9 @@ class ActivityMetadataResource extends BaseResource {
      *     tags={ "activity-metadata"},
      *     
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -281,6 +293,9 @@ class ActivityMetadataResource extends BaseResource {
      *     summary="Find an activity metadata by id",
      *     tags={ "activity-metadata"},
      *      
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),      
      *     @SWG\Parameter(
      *         description="ID of activity metadata to fetch",
      *         format="int64",

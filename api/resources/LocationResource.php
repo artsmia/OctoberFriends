@@ -16,6 +16,9 @@ class LocationResource extends BaseResource {
      *     tags={ "locations"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -54,6 +57,9 @@ class LocationResource extends BaseResource {
      *     summary="Find a location by id",
      *     tags={ "locations"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of location to fetch",
      *         format="int64",

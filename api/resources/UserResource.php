@@ -1,15 +1,15 @@
 <?php namespace DMA\Friends\API\Resources;
 
-use Auth;
 use Input;
 use Request;
+use Closure;
 use Response;
 use Exception;
 use Validator;
 use ValidationException;
+use FriendsAPIAuth;
 
 use DMA\Friends\Classes\AuthManager;
-
 use DMA\Friends\Models\Usermeta;
 use DMA\Friends\Classes\UserExtend;
 use DMA\Friends\Classes\API\BaseResource;
@@ -23,10 +23,18 @@ use Cms\Classes\Theme;
 
 class UserResource extends BaseResource
 {
-    protected $model        = '\RainLab\User\Models\User';
     
+    protected $model        = '\RainLab\User\Models\User';
     protected $transformer  = '\DMA\Friends\API\Transformers\UserTransformer';
     
+    
+    /**
+     * The following API actions in the UserResource are public.
+     * It means API Authentication will not be enforce.
+     * @var array
+     */
+    public $publicActions = ['login', 'loginByCard', 'store', 'profileOptions' ];
+        
     /**
      * Hacky variable to include user profile only when 
      * showing a single user
@@ -38,12 +46,14 @@ class UserResource extends BaseResource
     {
         // Add additional routes to Activity resource
         $this->addAdditionalRoute('login',          'login',                    ['POST']);
+        $this->addAdditionalRoute('loginByCard',    'login/card',               ['POST']);
         $this->addAdditionalRoute('uploadAvatar',   '{user}/upload-avatar',     ['POST', 'PUT']);
         $this->addAdditionalRoute('profileOptions', 'profile-options/{field}',  ['GET']);
         $this->addAdditionalRoute('profileOptions', 'profile-options',          ['GET']);
         $this->addAdditionalRoute('userActivities', '{user}/activities',        ['GET']);
         $this->addAdditionalRoute('userRewards',    '{user}/rewards',           ['GET']);
         $this->addAdditionalRoute('userBadges',     '{user}/badges',            ['GET']);
+        $this->addAdditionalRoute('userBookmarks',  '{user}/bookmarks/{type}',  ['GET']);
         
     }
     
@@ -61,7 +71,7 @@ class UserResource extends BaseResource
      * 
      * @SWG\Definition(
      *      definition="request.user.credentials",
-     *      required={"username", "password"},
+     *      required={"username", "password", "app_key"},
      *      @SWG\Property(
      *         property="username",
      *         type="string"
@@ -69,7 +79,12 @@ class UserResource extends BaseResource
      *      @SWG\Property(
      *         property="password",
      *         type="string"
-     *      )     
+     *      ),
+     *      @SWG\Property(
+     *         property="app_key",
+     *         type="string",
+     *         format="password"
+     *      )        
      * )
      * 
      * @SWG\Post(
@@ -106,21 +121,26 @@ class UserResource extends BaseResource
     public function login()
     {
         try {
-            $data = Request::all();
-        
+            $data    = Request::all();
+            $appKey  = array_get($data, 'app_key', NULL);
+           
             // Update wordpress passwords if necessary
             WordpressAuth::verifyFromEmail(array_get($data, 'email', ''), array_get($data, 'password'));
     
-            $data = [
+            $credentials = [
                 'login'     => array_get($data, 'username', array_get($data, 'email')),
-                'password'  => array_get($data, 'password')
+                'password'  => array_get($data, 'password'),
+                'app_key'   => $appKey    
             ];
     
-            $user = AuthManager::auth($data);
+            $authData = FriendsAPIAuth::attemp($credentials);
+            $user  =  array_get($authData, 'user',   Null);
+            $token =  array_get($authData, 'token',  Null);
             
-        
             if ($user) {
-                return $this->show($user->id);
+                $this->include_profile = true; 
+                return Response::api()->withItem($user, $this->getTransformer(), null, ['token' => $token]);
+                
             } else {
                 return Response::api()->errorNotFound('User not found');
             }
@@ -138,6 +158,95 @@ class UserResource extends BaseResource
     }
     
     
+    /**
+     *
+     * @SWG\Definition(
+     *      definition="request.user.credentials.card",
+     *      required={"barcode", "app_key"},
+     *      @SWG\Property(
+     *         property="barcode",
+     *         type="string"
+     *      ),
+     *      @SWG\Property(
+     *         property="app_key",
+     *         type="string",
+     *         format="password"
+     *      )
+     * )
+     *
+     * @SWG\Post(
+     *     path="users/login/card",
+     *     description="Authenticate user using username and password",
+     *     summary="User authentication",
+     *     tags={ "user"},
+     *
+     *     @SWG\Parameter(
+     *         description="User credentials payload",
+     *         name="body",
+     *         in="body",
+     *         required=true,
+     *         schema=@SWG\Schema(ref="#/definitions/request.user.credentials.card")
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="Successful response",
+     *         @SWG\Schema(ref="#/definitions/user.extended")
+     *     ),
+     *     @SWG\Response(
+     *         response=500,
+     *         description="Unexpected error",
+     *         @SWG\Schema(ref="#/definitions/error500")
+     *     ),
+     *     @SWG\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @SWG\Schema(ref="#/definitions/UserError404")
+     *     )
+     * )
+     */
+    
+    public function loginByCard()
+    {
+        try {
+            $data     = Request::all();
+            $rules = [
+                    'app_key'    => 'required',
+                    'barcode'    => 'required'
+            ];
+            
+            $validation = Validator::make($data, $rules);
+            if ($validation->fails()){
+                return $this->errorDataValidation('Invalidated credential details', $validation->errors());
+            }
+            
+            $appKey   = array_get($data, 'app_key', null);
+            $barcode  = array_get($data, 'barcode', null);
+            
+            // Attempt to look user using barcode
+            $user = User::where('barcode_id', $barcode)->first();
+            
+            
+            if ($user) {
+                $app = FriendsAPIAuth::getAPIApplication($appKey);
+                $token = FriendsAPIAuth::createToken($user, $app);
+  
+                $this->include_profile = true;
+                return Response::api()->withItem($user, $this->getTransformer(), null, ['token' => $token]);
+        
+            } else {
+                return Response::api()->errorNotFound('Barcode invalid');
+            }
+        
+        } catch(Exception $e) {
+            if ($e instanceof ValidationException) {
+                return $this->errorDataValidation('User credentials fail to validated', $e->getErrors());
+            } else {
+                // Lets the API resource deal with the exception
+                throw $e;
+            }
+        
+        }
+    }
 
     
     /**
@@ -147,6 +256,9 @@ class UserResource extends BaseResource
      *     summary="Find user by id",
      *     tags={ "user"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of user to fetch",
      *         format="int64",
@@ -190,6 +302,9 @@ class UserResource extends BaseResource
      *     tags={ "user"},
      *     
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -226,7 +341,12 @@ class UserResource extends BaseResource
      * @SWG\Definition(
      *     definition="request.user",
      *     type="object",
-     *     required={"email", "password", "password_confirm"},
+     *     required={"app_key", "email", "password", "password_confirm"},
+     *     
+     *     @SWG\Property(
+     *         property="app_key",
+     *         type="string"
+     *     ),      
      *     @SWG\Property(
      *         property="first_name",
      *         type="string"
@@ -344,8 +464,16 @@ class UserResource extends BaseResource
                     'last_name'             => 'min:2',
                     'birthday_year'         => 'required_with:birthday_month,birthday_day|alpha_num|min:4',
                     'birthday_month'        => 'required_with:birthday_year,birthday_day|alpha_num|min:2',
-                    'birthday_day'          => 'required_with:birthday_year,birthday_month|alpha_num|min:2'
+                    'birthday_day'          => 'required_with:birthday_year,birthday_month|alpha_num|min:2',
+                    'app_key'               => 'required',
             ];
+            
+            // Check if the application key is valid
+            // If Application key is invalid or inactive 
+            // an exception will raise
+            $appKey  = array_get($data, 'app_key', NULL);
+            FriendsAPIAuth::isApplicationKeyValid($appKey);
+            
             
             // Reformat birthday data structure
             $bd_year  = array_get($data, 'birthday_year', null);
@@ -371,7 +499,22 @@ class UserResource extends BaseResource
             
             // Register new user
             $user = AuthManager::register($data, $rules);
-            return $this->show($user->id);
+
+            $credentials = [
+                'login'     => array_get($data, 'username', array_get($data, 'email')),
+                'password'  => array_get($data, 'password'),
+                'app_key'   => $appKey    
+            ];
+    
+            # Generated authentication token for the newly created user
+            $authData = FriendsAPIAuth::attemp($credentials);
+            $user  =  array_get($authData, 'user',   Null);
+            $token =  array_get($authData, 'token',  Null);
+            
+            # Return new user and token
+            $this->include_profile = true; 
+            return Response::api()->withItem($user, $this->getTransformer(), null, ['token' => $token]);
+    
              
         } catch(Exception $e) {
             if ($e instanceof ModelException) {
@@ -393,6 +536,9 @@ class UserResource extends BaseResource
      *     description="Update an existing user",
      *     summary="Update an existing user",
      *     tags={ "user"},
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),     
      *     @SWG\Parameter(
      *         description="ID of user to fetch",
      *         format="int64",
@@ -435,20 +581,26 @@ class UserResource extends BaseResource
     public function update($id)
     {
         try{
+            
             if(is_null($user = User::find($id))){
                 return Response::api()->errorNotFound('User not found'); 
             }
             
             $data =  Request::all();
-            if(Request::isJson() && $data == ''){
+            if(Request::isJson() && ($data == '' || !$data)){
                 // Is JSON and data is empty, By default PHP
                 // blocks PUT/PATCH methods. So as workaround 
-                // get get the content and decode it manually
+                // get the content and decode it manually
                 // if required
                 $data = Request::getContent();
                 if (!is_array($data)){
                     $data = json_decode($data);
                 }
+
+            }
+            
+            if(!is_array($data)){
+                return $this->errorDataValidation('Invalid JSON body');
             }
 
             $rules = [
@@ -470,13 +622,22 @@ class UserResource extends BaseResource
                 unset($data['password_confirmation']);
             }
                         
+            // Force to update name field if first_name or last_name present
+            $first_name = array_get($data, 'first_name', null);
+            $last_name  = array_get($data, 'last_name', null);
+            if ( $first_name || $last_name ){
+                $first_name = (is_null($first_name)) ? $user->metadata->first_name : $first_name;
+                $last_name = (is_null($last_name)) ? $user->metadata->last_name : $last_name;
+                
+                $data['name'] = $first_name . ' ' . $last_name;
+            }
+            
             // Update user data
             $userAttrs = ['name' , 'password', 'password_confirmation', 'email',
                           'street_addr', 'city', 'state', 'zip', 'phone'];
 
             $user = $this->updateModelData($user, $data, $userAttrs);
-            
-            \Log::debug($data);
+           
 
             if($user->save()) {
                 // If user save ok them we update usermetadata
@@ -539,6 +700,9 @@ class UserResource extends BaseResource
      *     description="Change user avatar. Avatar must be a valid JPG, GIF or PNG. And not bigger that 400x400 pixels.",
      *     tags={ "user"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of user to fetch",
      *         format="int64",
@@ -717,6 +881,9 @@ class UserResource extends BaseResource
      *     tags={ "user"},
      *     
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -763,6 +930,9 @@ class UserResource extends BaseResource
      *     summary="Find user redeem rewards",
      *     tags={ "user"},
      *     
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -811,6 +981,9 @@ class UserResource extends BaseResource
      *     tags={ "user"},
      *     
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -850,17 +1023,103 @@ class UserResource extends BaseResource
         return $this->genericUserRelationResource($userId, $attrRelation, $transformer);
     }
     
-    private function genericUserRelationResource($userId, $attrRelation, $transformer)
+    
+    /**
+     * @SWG\Get(
+     *     path="users/{id}/bookmarks/{type}",
+     *     description="Returns user bookmarks",
+     *     summary="Find user bookmarks",
+     *     tags={ "user"},
+     *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
+     *         ref="#/parameters/per_page"
+     *     ),
+     *     @SWG\Parameter(
+     *         ref="#/parameters/page"
+     *     ),
+     *
+     *     @SWG\Parameter(
+     *         description="ID of user to fetch",
+     *         format="int64",
+     *         in="path",
+     *         name="id",
+     *         required=true,
+     *         type="integer"
+     *     ),
+     *     @SWG\Parameter(
+     *         description="Object type of bookmarks to retrive",
+     *         in="path",
+     *         name="type",
+     *         required=true,
+     *         type="string",
+     *         enum={"rewards", "badges", "activities"}
+     *     ),
+     *
+     *     @SWG\Response(
+     *         response=200,
+     *         description="Successful response",
+     *         @SWG\Schema(ref="#/definitions/bookmark")
+     *     ),
+     *     @SWG\Response(
+     *         response=500,
+     *         description="Unexpected error",
+     *         @SWG\Schema(ref="#/definitions/error500")
+     *     ),
+     *     @SWG\Response(
+     *         response=404,
+     *         description="Not Found",
+     *         @SWG\Schema(ref="#/definitions/error404")
+     *     )
+     * )
+     */
+    
+    public function userBookmarks($userId, $type)
     {
+        $transformer  = '\DMA\Friends\API\Transformers\BookmarkTransformer';
+        //$attrRelation = 'bookmarks';
+        $relation = function($user) use ($type){
+            $objectTypes = [
+                    'rewards'       => 'DMA\Friends\Models\Reward',
+                    'badges'        => 'DMA\Friends\Models\Badge',
+                    'activities'    => 'DMA\Friends\Models\Activity'
+            ];
+            
+            $model = array_get($objectTypes, $type);
+            if (!$model){
+                $options = implode(', ', array_keys($objectTypes));
+                throw new \Exception("$type is not a valid option. Options are $options");
+            }
+            
+            $query = $user->bookmarks()
+                          ->where('object_type', '=' , $model);
+            return $query;
+        };
+        
+        return $this->genericUserRelationResource($userId, $relation, $transformer);        
+    }
+    
+    private function genericUserRelationResource($userId, $relation, $transformer)
+    {        
         if(is_null($user = User::find($userId))){
             return Response::api()->errorNotFound('User not found');
         }
     
         $pageSize   = $this->getPageSize();
         $sortBy     = $this->getSortBy();
-        $query      = $user->{$attrRelation}();       
+        
+        if(is_string($relation)){
+            $query = $user->{$relation}();       
+        }else if( is_object($relation) && ($relation instanceof Closure) ){
+            $query = $relation($user);
+        }
         
         $transformer = new $transformer;
+        if(method_exists($transformer, 'setUser')){
+            $transformer->setUser($user);
+        }
     
         if ($pageSize > 0){
             $paginator = $query->paginate($pageSize);

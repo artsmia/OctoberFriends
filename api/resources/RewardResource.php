@@ -14,11 +14,20 @@ use RainLab\User\Models\User;
 
 
 class RewardResource extends BaseResource {
-
+  
     protected $model        = '\DMA\Friends\Models\Reward';
-
     protected $transformer  = '\DMA\Friends\API\Transformers\RewardTransformer';
-
+    
+    /**
+     * The listed actions that don't required check if 
+     * user can perform the action
+     * @var array
+     */
+    protected $skipUserPermissionValidation = [
+            'index', 'show'
+    ];
+    
+    
     public function __construct()
     {
         // Add additional routes to Activity resource
@@ -62,6 +71,9 @@ class RewardResource extends BaseResource {
      *     summary="Redeem a reward",
      *     tags={ "rewards"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of reward to redeem",
      *         format="int64",
@@ -171,6 +183,9 @@ class RewardResource extends BaseResource {
      *     tags={ "rewards"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         in="body",
      *         name="body",
      *         required=true,
@@ -228,6 +243,9 @@ class RewardResource extends BaseResource {
      *     tags={ "rewards"},
      *     
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -266,6 +284,9 @@ class RewardResource extends BaseResource {
      *     summary="Find a reward by id",
      *     tags={ "rewards"},
      *
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of reward to fetch",
      *         format="int64",

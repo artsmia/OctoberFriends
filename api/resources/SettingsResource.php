@@ -7,6 +7,15 @@ use DMA\Friends\Models\Settings as FriendsSettings;
 class SettingsResource extends BaseResource {
 
     /**
+     * The listed actions that don't required check if 
+     * user can perform the action
+     * @var array
+     */
+    protected $skipUserPermissionValidation = [
+            'index', 'show'
+    ];
+    
+    /**
      * @SWG\Definition(
      *     definition="settings.artwork_api.headers",
      *     type="object",
@@ -53,7 +62,9 @@ class SettingsResource extends BaseResource {
      *     summary="Return all public settings",
      *     tags={ "settings"},
      *        
-     *     
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="Successful response",

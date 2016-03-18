@@ -7,9 +7,8 @@ use RainLab\User\Models\User;
 use DMA\Friends\Classes\API\BaseResource;
 
 class ActivityLogResource extends BaseResource {
-
+    
     protected $model        = '\DMA\Friends\Models\ActivityLog';
-
     protected $transformer  = '\DMA\Friends\API\Transformers\ActivityLogTransformer';
 
 
@@ -28,7 +27,10 @@ class ActivityLogResource extends BaseResource {
      *     description="Returns all activity logs of a user",
      *     summary="Return activity logs by user",
      *     tags={"activity-logs"},
-     *
+     *     
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -97,6 +99,9 @@ class ActivityLogResource extends BaseResource {
      *     tags={ "activity-logs"},
      *
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -133,6 +138,9 @@ class ActivityLogResource extends BaseResource {
      *     summary="Return users activity log by type",
      *     tags={ "activity-logs"},
      *    
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
@@ -239,6 +247,9 @@ class ActivityLogResource extends BaseResource {
      *     tags={ "activity-logs"}, 
      *     
      *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
+     *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),
      *     @SWG\Parameter(
@@ -276,7 +287,10 @@ class ActivityLogResource extends BaseResource {
      *     description="Returns an activity logs by id",
      *     summary="Find an activity logs by id",
      *     tags={ "activity-logs"},
-     *      
+     *     
+     *     @SWG\Parameter(
+     *         ref="#/parameters/authorization"
+     *     ),
      *     @SWG\Parameter(
      *         description="ID of activity log to fetch",
      *         format="int64",

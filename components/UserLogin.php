@@ -184,7 +184,7 @@ class UserLogin extends ComponentBase
         $avatars = [];
 
         $themePath = UserLogin::getThemeDir();
-        $avatarPath = $themePath . '/assets/images/avatars/*.jpg';
+        $avatarPath = $themePath . '/assets/images/avatars/*';
 
         // loop through all the files in the plugin's avatars directory and parse the file names
         foreach ( glob($avatarPath ) as $file ) { 

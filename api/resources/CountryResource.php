@@ -6,16 +6,23 @@ use DMA\Friends\Classes\API\BaseResource;
 class CountryResource extends BaseResource
 {
     protected $model        = '\RainLab\User\Models\Country';
-    
     protected $transformer  = '\DMA\Friends\API\Transformers\CountryTransformer';
 
+    /**
+     * The following API actions in the UserResource are public.
+     * It means API Authentication will not be enforce.
+     * @var array
+     */
+    public $publicActions = ['show', 'index'];
+    
+    
     /**
      * @SWG\Get(
      *     path="countries",
      *     description="Returns all countries",
      *     summary="Return all countries",
      *     tags={ "countries"},
-     *  
+     *     
      *     @SWG\Parameter(
      *         ref="#/parameters/per_page"
      *     ),

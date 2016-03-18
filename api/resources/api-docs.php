@@ -6,7 +6,7 @@
  *     produces={"application/json"},
  *     consumes={"application/json", "application/x-www-form-urlencoded"},
  *     @SWG\Info(
- *         version="2.5.1",
+ *         version="2.6.1",
  *         title="DMA Friends",
  *         description="A platform for users to earn badges and redeem rewards",
  *         @SWG\License(
@@ -14,6 +14,16 @@
  *              url="http://www.apache.org/licenses/LICENSE-2.0.html"
  *         )
  *     )
+ * )
+ */
+
+
+/**
+ * @SWG\SecurityScheme(
+ *   securityDefinition="bearer",
+ *   type="apiKey",
+ *   in="header",
+ *   name="token"
  * )
  */
 
@@ -118,5 +128,14 @@
  *      items=@SWG\Schema(type="string"),
  *      collectionFormat="csv"
  * ) 
+ * 
+ * @SWG\Parameter(
+ *      description="Authentication token returned by User/Login endpoint",
+ *      name="authorization",
+ *      in="header",
+ *      type="string",
+ *      required=true
+ * ) 
+ *
  *
  */
